@@ -52,7 +52,7 @@ public class HeaderUtil {
         int index = param.indexOf("=");
         if(index > -1) {
             String key = param.substring(0, index);
-            String value = param.substring(index + 1, param.length());
+            String value = param.substring(index + 1);
 
             paramMap.put(key, value);
         }

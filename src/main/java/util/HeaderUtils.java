@@ -4,7 +4,7 @@ package util;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HeaderUtil {
+public class HeaderUtils {
 
     public static String getUriInHeader(String header) {
         String[] headerArr = header.split(" ");
@@ -40,7 +40,7 @@ public class HeaderUtil {
         }
 
         for (String param : paramArr) {
-            mapInputParam(param, paramMap);
+            addParam(param, paramMap);
         }
 
         System.out.println(paramMap);
@@ -48,7 +48,7 @@ public class HeaderUtil {
         return paramMap;
     }
 
-    private static void mapInputParam (String param, Map<String, String> paramMap) {
+    private static void addParam (String param, Map<String, String> paramMap) {
         int index = param.indexOf("=");
         if(index > -1) {
             String key = param.substring(0, index);
@@ -56,6 +56,11 @@ public class HeaderUtil {
 
             paramMap.put(key, value);
         }
+    }
+
+    public static int getContentLength(String line) {
+        String[] headerTokens = line.split(":");
+        return Integer.parseInt(headerTokens[1].trim());
     }
 
 }

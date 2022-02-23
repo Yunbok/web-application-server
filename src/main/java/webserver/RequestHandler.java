@@ -39,7 +39,7 @@ public class RequestHandler extends Thread {
             final String[] header = line.split(" ");
             String queryString = "";
 
-            while(!"".equals(line)) {
+            while (!"".equals(line)) {
                 line = br.readLine();
                 if (line.contains("Content-Length")) {
                     contentLength = HeaderUtils.getContentLength(line);
@@ -62,12 +62,10 @@ public class RequestHandler extends Thread {
                 response302Header(dos,"/index.html");
             } else if ("/user/login".equals(url)) {
 
-
                 String body = IOUtils.readData(br,contentLength);
 
                 final Map<String, String> params = HttpRequestUtils.parseQueryString(body);
                 final User user = DataBase.findUserById(params.get("userId"));
-
 
                 if ( user == null ) {
                     responseResource(out,"/user/login_failed.html");

@@ -3,6 +3,7 @@ package util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HeaderUtils {
 
@@ -33,29 +34,33 @@ public class HeaderUtils {
     public static Map<String, String> paramToMap(String paramText) {
         int length = paramText.length();
         String[] paramArr = paramText.split("&");
-        Map<String, String> paramMap = new HashMap<>();
+        Map<String, String> paramMap = new ConcurrentHashMap<>();
 
         if (length == 0) {
             return paramMap;
         }
 
         for (String param : paramArr) {
-            addParam(param, paramMap);
+            paramMap = addSubstrParam(param, paramMap);
         }
-
-        System.out.println(paramMap);
 
         return paramMap;
     }
 
-    private static void addParam (String param, Map<String, String> paramMap) {
-        int index = param.indexOf("=");
-        if(index > -1) {
-            String key = param.substring(0, index);
-            String value = param.substring(index + 1);
+    private static Map<String,String> addSubstrParam (final String param,final Map<String, String> paramMap) {
+        final Map<String , String> resultMap = new ConcurrentHashMap<>(paramMap);
+        final int index = param.indexOf("=");
 
-            paramMap.put(key, value);
+        if (index == -1 ) {
+            return resultMap;
         }
+
+        final String key = param.substring(0, index);
+        final String value = param.substring(index + 1);
+
+        resultMap.put(key, value);
+
+        return resultMap;
     }
 
     public static int getContentLength(String line) {

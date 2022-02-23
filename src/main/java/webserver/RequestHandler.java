@@ -39,7 +39,7 @@ public class RequestHandler extends Thread {
             final String[] header = line.split(" ");
             String queryString = "";
 
-            while (!"".equals(line)) {
+            while (!line.isEmpty()) {
                 line = br.readLine();
                 if (line.contains("Content-Length")) {
                     contentLength = HeaderUtils.getContentLength(line);

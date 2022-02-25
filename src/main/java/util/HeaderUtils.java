@@ -63,9 +63,13 @@ public class HeaderUtils {
         return resultMap;
     }
 
-    public static int getContentLength(String line) {
+    public static String getHeaderContents(String line) {
         String[] headerTokens = line.split(":");
-        return Integer.parseInt(headerTokens[1].trim());
+        return headerTokens[1].trim();
+    }
+
+    public static int getContentLength(String line) {
+        return Integer.parseInt(getHeaderContents(line));
     }
 
 }

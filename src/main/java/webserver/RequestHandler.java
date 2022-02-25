@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import db.DataBase;
@@ -18,15 +18,15 @@ import util.IOUtils;
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    private Socket connection;
+    private final Socket connection;
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
 
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
+//        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
+//                connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
@@ -34,15 +34,21 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line = br.readLine();
             final String url = HeaderUtils.getUriInHeader(line);
-            final String realUrl = HeaderUtils.getRealUrl(url);
             int contentLength = 0;
             final String[] header = line.split(" ");
             String queryString = "";
+            Map<String, String> cookie = new HashMap<>();
 
+            System.out.println(url);
             while (!line.isEmpty()) {
                 line = br.readLine();
                 if (line.contains("Content-Length")) {
                     contentLength = HeaderUtils.getContentLength(line);
+                }
+
+                if (line.contains("Cookie")) {
+                    cookie = HttpRequestUtils.parseCookies(line);
+                    System.out.println(cookie);
                 }
             }
 
@@ -51,8 +57,7 @@ public class RequestHandler extends Thread {
                     final int index = url.indexOf("?");
                     queryString = url.substring(index + 1);
                 } else if ("POST".equals(header[0])) {
-                    String body = IOUtils.readData(br,contentLength);
-                    queryString = body;
+                    queryString = IOUtils.readData(br,contentLength);
                 }
                 final Map<String, String> params = HttpRequestUtils.parseQueryString(queryString);
                 final User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
@@ -78,6 +83,13 @@ public class RequestHandler extends Thread {
                     responseResource(out,"/user/login_failed.html");
                 }
 
+            } else if ("/user/list".equals(url)) {
+                if ( cookie.containsKey("logined") && "true".equals(cookie.get("logined"))  ){
+                    responseResource(out,"/user/list.html");
+                } else {
+                    final DataOutputStream dos = new DataOutputStream(out);
+                    response302Header(dos,"/user/login.html");
+                }
             } else {
                 responseResource(out,url);
             }

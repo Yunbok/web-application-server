@@ -7,14 +7,14 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-public class HeaderUtilTest {
+public class HeaderUtilsTest {
 
     @Test
     public void url_분리() {
 
         String header = "GET /index.html HTTP/1.1";
 
-        String url = HeaderUtil.getUriInHeader(header);
+        String url = HeaderUtils.getUriInHeader(header);
 
         assertThat("/index.html", is(url));
     }
@@ -26,7 +26,7 @@ public class HeaderUtilTest {
 
         String pullUrl = "/index.html?name=123&password=1234";
 
-        String url = HeaderUtil.getRealUrl(pullUrl);
+        String url = HeaderUtils.getRealUrl(pullUrl);
 
         assertThat("/index.html", is(url));
     }
@@ -36,7 +36,7 @@ public class HeaderUtilTest {
 
         String pullUrl = "/index.html?name=123&password=1234";
 
-        String url = HeaderUtil.getParamInUrl(pullUrl);
+        String url = HeaderUtils.getParamInUrl(pullUrl);
 
         assertThat("name=123&password=1234", is(url));
     }
@@ -46,7 +46,7 @@ public class HeaderUtilTest {
 
         String pullUrl = "/index.html";
 
-        String url = HeaderUtil.getParamInUrl(pullUrl);
+        String url = HeaderUtils.getParamInUrl(pullUrl);
 
         assertThat("", is(url));
     }
@@ -56,7 +56,7 @@ public class HeaderUtilTest {
 
         String pullUrl = "name=123&password=1234";
 
-        Map<String,String> map =  HeaderUtil.paramToMap(pullUrl);
+        Map<String,String> map =  HeaderUtils.paramToMap(pullUrl);
 
         assertThat("123", is(map.get("name")));
         assertThat("1234", is(map.get("password")));

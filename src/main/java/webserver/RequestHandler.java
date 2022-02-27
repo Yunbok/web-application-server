@@ -4,7 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import db.DataBase;
@@ -39,7 +41,6 @@ public class RequestHandler extends Thread {
             String queryString = "";
             Map<String, String> cookie = new HashMap<>();
 
-            System.out.println(url);
             while (!line.isEmpty()) {
                 line = br.readLine();
                 if (line.contains("Content-Length")) {
@@ -85,7 +86,7 @@ public class RequestHandler extends Thread {
 
             } else if ("/user/list".equals(url)) {
                 if ( cookie.containsKey("logined") && "true".equals(cookie.get("logined"))  ){
-                    responseResource(out,"/user/list.html");
+                    responseResource2(out,"/user/list.html");
                 } else {
                     final DataOutputStream dos = new DataOutputStream(out);
                     response302Header(dos,"/user/login.html");
@@ -104,6 +105,38 @@ public class RequestHandler extends Thread {
         response200Header(dos,body.length);
         responseBody(dos, body);
     }
+
+    private void responseResource2(OutputStream out, String url) throws IOException {
+        final DataOutputStream dos = new DataOutputStream(out);
+        List<String> list = Files.readAllLines(new File("./webapp" + url).toPath());
+        StringBuilder sb = new StringBuilder();
+
+        for (String i : list) {
+            sb.append(i);
+            if ("<tbody>".equals(i.trim())) {
+                sb.append(userListHTML());
+            }
+        }
+
+        final byte[] body = sb.toString().getBytes(StandardCharsets.UTF_8);
+
+        response200Header(dos,body.length);
+        responseBody(dos, body);
+
+    }
+    private String userListHTML() {
+        Collection<User> userList = DataBase.findAll();
+        StringBuilder sb = new StringBuilder();
+
+        for (User user : userList) {
+            sb.append("<tr>\n" +
+                    "    <th scope=\"row\">1</th> <td>" + user.getUserId() + "</td> <td>" + user.getName() + "</td> <td>" + user.getEmail() + "</td><td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td>\n" +
+                    " </tr>");
+        }
+
+        return sb.toString();
+    }
+
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {

@@ -43,6 +43,7 @@ public class RequestHandler extends Thread {
 
             while (!line.isEmpty()) {
                 line = br.readLine();
+                System.out.println(line);
                 if (line.contains("Content-Length")) {
                     contentLength = HeaderUtils.getContentLength(line);
                 }
@@ -91,6 +92,13 @@ public class RequestHandler extends Thread {
                     final DataOutputStream dos = new DataOutputStream(out);
                     response302Header(dos,"/user/login.html");
                 }
+            } else if (url.endsWith(".css")) {
+                log.debug(url);
+                final DataOutputStream dos = new DataOutputStream(out);
+                final byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                responseCSSHeader(dos,body.length);
+                responseBody(dos, body);
+
             } else {
                 responseResource(out,url);
             }
@@ -138,6 +146,16 @@ public class RequestHandler extends Thread {
     }
 
 
+    private void responseCSSHeader(DataOutputStream dos,int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");

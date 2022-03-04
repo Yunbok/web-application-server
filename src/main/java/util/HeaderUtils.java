@@ -47,8 +47,8 @@ public class HeaderUtils {
         return paramMap;
     }
 
-    private static Map<String,String> addSubstrParam (final String param,final Map<String, String> paramMap) {
-        final Map<String , String> resultMap = new ConcurrentHashMap<>(paramMap);
+    private static Map<String, String> addSubstrParam (final String param,final Map<String, String> paramMap) {
+        final Map<String, String> resultMap = new ConcurrentHashMap<>(paramMap);
         final int index = param.indexOf("=");
 
         if (index == -1 ) {

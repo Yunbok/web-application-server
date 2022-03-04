@@ -9,9 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
-    final Map<String , String > header = new HashMap<>();
-    final String method;
-    final String path;
+    private final Map<String, String> header = new HashMap<>();
+    private final Map<String, String> parameter = new HashMap<>();
+    private final String method;
+    private final String path;
 
 
     HttpRequest(InputStream inputStream) throws IOException {
@@ -19,19 +20,22 @@ public class HttpRequest {
 
         String line = br.readLine();
         String[] headerText = line.split(" ");
-        this.method = headerText[0].trim();
-        this.path = headerText[1].trim();
 
+        this.method = headerText[0].trim();
+        if (headerText[1].contains("?")) {
+            this.path = headerText[1].substring(0, headerText[1].indexOf("?"));
+        } else {
+            this.path = headerText[1];
+        }
 
         while (!line.isEmpty()) {
             line = br.readLine();
-            System.out.println(line);
             if ( line == null) {
                 break;
             }
-            String[] lineArr = line.split(":");
-            if ( lineArr.length > 1) {
-                header.put(lineArr[0].trim(), lineArr[1].trim());
+            int index = line.indexOf(":");
+            if ( index > 0 ) {
+                header.put(line.substring(0,index).trim(), line.substring(index + 1).trim());
             }
         }
     }
@@ -46,6 +50,18 @@ public class HttpRequest {
             return path;
         }
         return path.substring(0, index);
+    }
+    public String getHeader(String key) {
+        if ( !header.containsKey(key) ){
+            return "";
+        }
+        return header.get(key);
+    }
+    public String getParameter(String key) {
+        if ( !parameter.containsKey(key) ){
+            return "";
+        }
+        return parameter.get(key);
     }
 
 }

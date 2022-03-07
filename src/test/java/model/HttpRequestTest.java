@@ -9,7 +9,7 @@ import java.io.InputStream;
 import static org.junit.Assert.assertEquals;
 
 public class HttpRequestTest {
-    private String testDirectory = "./src/test/resources";
+    private final String testDirectory = "./src/test/resources";
 
     @Test
     public void request_GET() throws Exception {
@@ -21,7 +21,7 @@ public class HttpRequestTest {
         assertEquals("GET" , request.getMethod());
         assertEquals("/user/create" , request.getPath());
         assertEquals("keep-alive" , request.getHeader("Connection"));
-//        assertEquals("javajigi" , request.get());
+        assertEquals("javajigi" , request.getParameter("userId"));
 
     }
 
@@ -35,5 +35,7 @@ public class HttpRequestTest {
         assertEquals("POST", request.getMethod());
         assertEquals("/user/create", request.getPath());
         assertEquals("keep-alive" , request.getHeader("Connection"));
+        assertEquals("javajigi" , request.getParameter("userId"));
+
     }
 }

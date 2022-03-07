@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import db.DataBase;
+import model.HttpRequest;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,53 +33,26 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            HttpRequest httpRequest = new HttpRequest(in);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            String line = br.readLine();
-            final String url = HeaderUtils.getUriInHeader(line);
-            int contentLength = 0;
-            final String[] header = line.split(" ");
-            String queryString = "";
+            final String url = httpRequest.getPath();
             Map<String, String> cookie = new HashMap<>();
 
-            while (!line.isEmpty()) {
-                line = br.readLine();
-                System.out.println(line);
-                if (line.contains("Content-Length")) {
-                    contentLength = HeaderUtils.getContentLength(line);
-                }
-
-                if (line.contains("Cookie")) {
-                    cookie = HttpRequestUtils.parseCookies(line);
-                    System.out.println(cookie);
-                }
-            }
-
             if (url.startsWith("/user/create")) {
-                if ( "GET".equals(header[0])) {
-                    final int index = url.indexOf("?");
-                    queryString = url.substring(index + 1);
-                } else if ("POST".equals(header[0])) {
-                    queryString = IOUtils.readData(br,contentLength);
-                }
-                final Map<String, String> params = HttpRequestUtils.parseQueryString(queryString);
-                final User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
+                final User user = new User(httpRequest.getParameter("userId"), httpRequest.getParameter("password"), httpRequest.getParameter("name"), httpRequest.getParameter("email"));
                 DataBase.addUser(user);
 
                 final DataOutputStream dos = new DataOutputStream(out);
                 response302Header(dos,"/index.html");
             } else if ("/user/login".equals(url)) {
 
-                String body = IOUtils.readData(br,contentLength);
-
-                final Map<String, String> params = HttpRequestUtils.parseQueryString(body);
-                final User user = DataBase.findUserById(params.get("userId"));
+                final User user = DataBase.findUserById(httpRequest.getParameter("userId"));
 
                 if ( user == null ) {
                     responseResource(out,"/user/login_failed.html");
                 }
 
-                if (user.getPassword().equals(params.get("password"))) {
+                if (user.getPassword().equals(httpRequest.getParameter("password"))) {
                     final DataOutputStream dos = new DataOutputStream(out);
                     response302LoginSuccessHeader(dos);
                 } else {
